@@ -4,11 +4,11 @@ export class Tree{
     constructor(array){
         let s = new Set(array);
         let noDupArray = [...s];
-        this.array = noDupArray;
+        this.array = noDupArray.sort((a,b) => a - b);
         this.root = this.buildTree();
     }
 
-    buildTree(array = this.array,start = 0, end = array.length){
+    buildTree(array = this.array,start = 0, end = array.length - 1){
         if(start > end) return null;
 
         let mid = start + Math.floor((end - start) / 2);
@@ -80,6 +80,7 @@ export class Tree{
     }
 
     levelOrder(callback){
+        if(typeof callback !== 'function') throw new Error('callback is required');
         let queue = [];
         queue.push(this.root);
         while(queue.length > 0){
@@ -91,6 +92,7 @@ export class Tree{
     }
 
     inOrder(callback){
+        if(typeof callback !== 'function') throw new Error('callback is required');
         let stack = [];
         let current = this.root;
         while(current !== null || stack.length > 0){
@@ -105,6 +107,7 @@ export class Tree{
     }
 
     preOrder(callback){
+        if(typeof callback !== 'function') throw new Error('callback is required');
         let stack = [];
         stack.push(this.root);
         while(stack.length > 0){
@@ -116,6 +119,7 @@ export class Tree{
     }
 
     postOrder(callback){
+        if(typeof callback !== 'function') throw new Error('callback is required');
         let stack = [];
         let current = this.root;
         let lastVisited = null;
@@ -132,5 +136,41 @@ export class Tree{
                 lastVisited = stack.pop();
             }
         }
+    }
+
+    height(node){
+        if(node === null) return -1;
+
+        let leftHeight = this.height(node.left);
+        let rightHeight = this.height(node.right);
+
+        return Math.max(leftHeight,rightHeight) + 1;
+    }
+
+    depth(node, root = this.root, depthCount = 0) {
+        if (root === null || node === null) return -1;
+        if (root === node) return depthCount;
+        return node.data < root.data
+            ? this.depth(node, root.left, depthCount + 1)
+            : this.depth(node, root.right, depthCount + 1);
+    }
+    
+
+    isBalanced(node = this.root) {
+        function checkBalance(node) {
+            if (node === null) return 0;
+            let leftHeight = checkBalance(node.left);
+            let rightHeight = checkBalance(node.right);
+            if (leftHeight === -1 || rightHeight === -1 || Math.abs(leftHeight - rightHeight) > 1) return -1;
+            return Math.max(leftHeight, rightHeight) + 1;
+        }
+        return checkBalance(node) !== -1;
+    }
+    
+
+    rebalance(){
+        let array = [];
+        this.inOrder(node => array.push(node.data));
+        this.root = this.buildTree(array);
     }
 }
